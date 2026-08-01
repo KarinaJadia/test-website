@@ -3,6 +3,114 @@
     <body>
         <script>
             // javascript
+
+            function textToBinary(text) {
+                return [...text]
+                    .map(c => c.charCodeAt(0).toString(2).padStart(8, "0"))
+                    .join("");
+            }
+
+            function binaryToText(binary) {
+                let result = "";
+                for (let i = 0; i < binary.length; i += 8) {
+                    result += String.fromCharCode(parseInt(binary.slice(i, i + 8), 2));
+                }
+                return result;
+            }
+
+            function encryptBinary(binary, key) {
+                const [k1, k2, k3, k4] = key;
+                let encrypted = "";
+                for (let i = 0; i < binary.length; i += 8) {
+                    let b = parseInt(binary.slice(i, i + 8).padEnd(8, "0"), 2);
+                    b ^= k1;
+                    b = ((b << k2) | (b >> (8 - k2))) & 255;
+                    b ^= k3;
+                    b = ((b >> k4) | (b << (8 - k4))) & 255;
+                    encrypted += b.toString(2).padStart(8, "0");
+                }
+                return encrypted;
+            }
+
+            function decryptBinary(binary, key) {
+                const [k1, k2, k3, k4] = key;
+                let decrypted = "";
+                for (let i = 0; i < binary.length; i += 8) {
+                    let b = parseInt(binary.slice(i, i + 8).padEnd(8, "0"), 2);
+                    b = ((b << k4) | (b >> (8 - k4))) & 255;
+                    b ^= k3;
+                    b = ((b >> k2) | (b << (8 - k2))) & 255;
+                    b ^= k1;
+                    decrypted += b.toString(2).padStart(8, "0");
+                }
+                return decrypted;
+            }
+
+            function generateMessage(message) {
+                return message + ";" + message.length;
+            }
+
+            async function encryptImage() {
+                const file = document.getElementById("image").files[0];
+                if (!file) {
+                    document.getElementById("result").innerHTML = "Upload an image.";
+                    return;
+                }
+                const message = document.getElementById("message").value;
+                const key = document.getElementById("key")
+                    .value
+                    .split("")
+                    .map(Number);
+
+                if (key.length !== 4) {
+                    document.getElementById("result").innerHTML = "Key must be 4 digits.";
+                    return;
+                }
+                const bytes = new Uint8Array(await file.arrayBuffer());
+                const binary = textToBinary(message);
+                const encrypted = encryptBinary(binary, key);
+                const appended = new TextEncoder().encode(generateMessage(encrypted));
+                const output = new Uint8Array(bytes.length + appended.length);
+                output.set(bytes);
+                output.set(appended, bytes.length);
+                const blob = new Blob([output], { type: file.type });
+                const url = URL.createObjectURL(blob);
+                document.getElementById("result").innerHTML =
+                    `<img src="${url}" style="max-width:400px"><br><a href="${url}" download="modified-${file.name}">Download Image</a>`;
+            }
+
+            async function decryptImage() {
+                const file = document.getElementById("image").files[0];
+                if (!file) {
+                    document.getElementById("result").innerHTML = "Upload an image.";
+                    return;
+                }
+                const key = document.getElementById("key")
+                    .value
+                    .split("")
+                    .map(Number);
+                if (key.length !== 4) {
+                    document.getElementById("result").innerHTML = "Key must be 4 digits.";
+                    return;
+                }
+                const bytes = new Uint8Array(await file.arrayBuffer());
+                const text = new TextDecoder().decode(bytes);
+                const semi = text.lastIndexOf(";");
+                if (semi === -1) {
+                    document.getElementById("result").innerHTML = "No hidden message found.";
+                    return;
+                }
+                const length = parseInt(text.substring(semi + 1));
+                if (isNaN(length)) {
+                    document.getElementById("result").innerHTML = "Invalid encoded image.";
+                    return;
+                }
+                const bits = text.substring(semi - length, semi);
+                const decryptedBinary = decryptBinary(bits, key);
+                const message = binaryToText(decryptedBinary);
+                document.getElementById("result").innerHTML = message;
+            }
+
         </script>
         <link rel="stylesheet" href="index.css">
         <style></style>
@@ -26,7 +134,7 @@
                         <input type="file" id="image" accept="image/*"><br><br>
 
                         <label for="key">Key:</label>
-                        <input type="text" id="key" placeholder="1234"><br><br>
+                        <input type="text" id="key" placeholder="must be 4 digits"><br><br>
 
                         <label for="message">Message:</label>
                         <input type="text" id="message"><br><br>
