@@ -3,7 +3,8 @@
     <body>
         <script>
             // javascript
-
+            // translated to javascript from https://github.com/KarinaJadia/Other-Projects/blob/main/photocrypt.py
+            
             function textToBinary(text) {
                 return [...text]
                     .map(c => c.charCodeAt(0).toString(2).padStart(8, "0"))
@@ -97,12 +98,12 @@
                 const text = new TextDecoder().decode(bytes);
                 const semi = text.lastIndexOf(";");
                 if (semi === -1) {
-                    document.getElementById("result").innerHTML = "No hidden message found.";
+                    document.getElementById("result").innerHTML = "no hidden message found";
                     return;
                 }
                 const length = parseInt(text.substring(semi + 1));
                 if (isNaN(length)) {
-                    document.getElementById("result").innerHTML = "Invalid encoded image.";
+                    document.getElementById("result").innerHTML = "invalid encoded image";
                     return;
                 }
                 const bits = text.substring(semi - length, semi);
