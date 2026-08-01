@@ -76,7 +76,7 @@
                 const blob = new Blob([output], { type: file.type });
                 const url = URL.createObjectURL(blob);
                 document.getElementById("result").innerHTML =
-                    `<img src="${url}" style="max-width:400px"><br><a href="${url}" download="modified-${file.name}">Download Image</a>`;
+                    `<img src="${url}" style="max-width:400px"><br><a href="${url}" download="modified-${file.name}"></a>`;
             }
 
             async function decryptImage() {
@@ -113,7 +113,39 @@
 
         </script>
         <link rel="stylesheet" href="index.css">
-        <style></style>
+        <style>
+            .inputs {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .input-row {
+                display: flex;
+                align-items: center;
+            }
+
+            .input-row label {
+                width: 120px;
+                text-align: right;
+                margin-right: 10px;
+            }
+
+            .input-row input[type="text"] {
+                width: 275px;
+                box-sizing: border-box;
+            }
+
+            .input-row input[type="file"] {
+                width: 275px;
+            }
+
+            .button-row {
+                display: flex;
+                gap: 10px;
+            }
+        </style>
         <!-- HTML -->
         <nav>
             <ul>
@@ -130,17 +162,27 @@
             <div class = 'box'>
                 <h1>Photocryptor</h1>
                     <div class="inputs">
-                        <label for="image">Upload Image:</label>
-                        <input type="file" id="image" accept="image/*"><br><br>
 
-                        <label for="key">Key:</label>
-                        <input type="text" id="key" placeholder="must be 4 digits"><br><br>
+                        <div class="input-row">
+                            <label for="image">upload image:</label>
+                            <input type="file" id="image" accept="image/*">
+                        </div>
 
-                        <label for="message">Message:</label>
-                        <input type="text" id="message"><br><br>
+                        <div class="input-row">
+                            <label for="key">key:</label>
+                            <input type="text" id="key" placeholder="must be 4 digits">
+                        </div>
 
-                        <button onclick="encryptImage()" class="button">Encrypt</button>
-                        <button onclick="decryptImage()" class="button">Decrypt</button>
+                        <div class="input-row">
+                            <label for="message">message:</label>
+                            <input type="text" id="message">
+                        </div>
+
+                        <div class="button-row">
+                            <button onclick="encryptImage()" class="button">encrypt</button>
+                            <button onclick="decryptImage()" class="button">decrypt</button>
+                        </div>
+
                     </div>
             </div>
             <div class = 'result-box'>
